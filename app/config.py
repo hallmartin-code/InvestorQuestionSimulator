@@ -145,16 +145,15 @@ class Settings(BaseSettings):
             if self.llm_enabled and self.anthropic_api_key is None:
                 errors.append("ANTHROPIC_API_KEY is required in production "
                               "(or set LLM_ENABLED=false to run in heuristic mode).")
-            if self.ic_app_token is None:
-                errors.append("IC_APP_TOKEN is required in production so the app is not publicly accessible.")
-            elif len(self.ic_app_token.get_secret_value()) < MIN_TOKEN_LENGTH:
-                errors.append(f"IC_APP_TOKEN must be at least {MIN_TOKEN_LENGTH} characters.")
-        else:
-            if not self.llm_available:
-                warnings.append("ANTHROPIC_API_KEY is not set or LLM_ENABLED=false: the interview runs in "
-                                "heuristic mode (rule-based extraction, template questions, heuristic scoring).")
-            if self.ic_app_token is None:
-                warnings.append("IC_APP_TOKEN is not set: the app is open to anyone who can reach it.")
+        elif not self.llm_available:
+            warnings.append("ANTHROPIC_API_KEY is not set or LLM_ENABLED=false: the interview runs in "
+                            "heuristic mode (rule-based extraction, template questions, heuristic scoring).")
+
+        # The access token is optional: without it the app is an open system.
+        if self.ic_app_token is None:
+            warnings.append("IC_APP_TOKEN is not set: open access - the app is open to anyone who can reach it.")
+        elif len(self.ic_app_token.get_secret_value()) < MIN_TOKEN_LENGTH:
+            errors.append(f"IC_APP_TOKEN must be at least {MIN_TOKEN_LENGTH} characters when set.")
 
         if self.ten_analytics_endpoint:
             parsed = urlparse(self.ten_analytics_endpoint)

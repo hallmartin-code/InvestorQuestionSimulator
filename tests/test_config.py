@@ -13,15 +13,23 @@ def make(**overrides) -> Settings:
     return Settings(_env_file=None, **{**UNSET, **overrides})
 
 
-def test_production_requires_model_key_and_access_token():
+def test_production_requires_the_model_key_but_not_an_access_token():
     with pytest.raises(ConfigError) as info:
         make(app_env="production").validate_startup()
-    assert "ANTHROPIC_API_KEY" in str(info.value) and "IC_APP_TOKEN" in str(info.value)
+    assert "ANTHROPIC_API_KEY" in str(info.value) and "IC_APP_TOKEN" not in str(info.value)
 
 
-def test_production_heuristic_mode_needs_only_the_token():
+def test_production_runs_as_an_open_system_without_a_token():
+    settings = make(app_env="production", anthropic_api_key=SecretStr("k"))
+    warnings = settings.validate_startup()
+    assert not settings.access_token_required and settings.cookie_secure
+    assert any("open access" in w for w in warnings)
+
+
+def test_production_with_a_token_has_no_access_warning():
     settings = make(app_env="production", llm_enabled=False, ic_app_token=SecretStr("x" * 24))
     warnings = settings.validate_startup()
+    assert settings.access_token_required
     assert [w for w in warnings if "RESEND_API_KEY" not in w] == []  # email is optional
     assert settings.cookie_secure and not settings.llm_available
 
@@ -29,6 +37,8 @@ def test_production_heuristic_mode_needs_only_the_token():
 def test_short_access_token_is_rejected():
     with pytest.raises(ConfigError, match="at least 16"):
         make(app_env="production", anthropic_api_key=SecretStr("k"), ic_app_token=SecretStr("short")).validate_startup()
+    with pytest.raises(ConfigError, match="at least 16"):
+        make(app_env="development", ic_app_token=SecretStr("short")).validate_startup()
 
 
 def test_analytics_endpoint_validation():

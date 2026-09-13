@@ -114,7 +114,7 @@ Optional: install LibreOffice to accept legacy `.ppt` files (`soffice` must be o
 |---|---|---|
 | `APP_ENV` | `development` | `production` enforces required secrets, Secure cookies, HSTS and https analytics. |
 | `ANTHROPIC_API_KEY` | — | Claude API key. Required in production unless `LLM_ENABLED=false`. |
-| `IC_APP_TOKEN` | — | Shared access token for the app (16+ chars). Required in production. |
+| `IC_APP_TOKEN` | — | Optional shared access token (16+ chars). Unset = open system anyone with the URL can use. |
 | `TEN_ANALYTICS_ENDPOINT` | — | HTTPS endpoint receiving analytics records (POST JSON). |
 | `TEN_ANALYTICS_API_KEY` | — | Bearer token for the endpoint. Required when the endpoint is set. |
 | `MAX_UPLOAD_MB` | `25` | Upload size limit (1–100). |
@@ -350,8 +350,9 @@ Set `EMAIL_REQUIRES_STORAGE_CONSENT=true` to email only sessions where the found
 
 ## 11. Security considerations
 
-- **Access.** `IC_APP_TOKEN` gates the app (constant-time comparison, per-client failed-login
-  throttling, session id rotated on login).
+- **Access.** Open by default: anyone with the URL can run an interview, and each one calls Claude and
+  sends a results email, so set a monthly spend limit in the Claude Console. Setting `IC_APP_TOKEN` turns on a
+  sign-in gate (constant-time comparison, per-client failed-login throttling, session id rotated on login).
 - **Sessions.** Random 256-bit id in an `HttpOnly`, `SameSite=Lax` cookie (`Secure` in production).
   State is server-side only and deleted after `DATA_RETENTION_HOURS` regardless of activity; the
   store evicts least-recently-used sessions beyond 2,000.
@@ -413,9 +414,11 @@ replica). `.railwayignore` keeps `.env` and tests out of the upload; secrets exi
 
    ```bash
    railway variable set ANTHROPIC_API_KEY --stdin --service investor-question-simulator
-   railway variable set IC_APP_TOKEN --stdin --service investor-question-simulator
    railway variable set APP_ENV=production LLM_MODEL=claude-opus-5 --service investor-question-simulator
    ```
+
+   The app runs as an open system. To require sign-in instead, also set
+   `railway variable set IC_APP_TOKEN --stdin --service investor-question-simulator`.
 
    Optional analytics: `TEN_ANALYTICS_ENDPOINT` and `TEN_ANALYTICS_API_KEY`.
 

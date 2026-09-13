@@ -106,6 +106,15 @@ def test_oversized_request_is_rejected_before_parsing(settings):
     assert response.status_code == 413
 
 
+def test_open_system_needs_no_sign_in(settings, fixture_files):
+    client = make_client(settings.model_copy(update={"app_env": "production", "session_cookie_secure": False}))
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 200 and "Pitch Deck" in response.text
+    assert client.get("/login", follow_redirects=False).headers["location"] == "/"
+    token = csrf_from(client)
+    assert post_upload(client, fixture_files, token).headers["location"] == "/review"
+
+
 def test_access_token_gate_and_session_rotation(settings):
     client = make_client(settings, ic_app_token=SecretStr(TOKEN))
     response = client.get("/", follow_redirects=False)
