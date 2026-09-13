@@ -1,7 +1,7 @@
 """FastAPI application factory, security middleware and startup validation.
 
 Run locally:    uvicorn app.main:create_app --factory --reload
-or:             python -m app.main
+Production:     python -m app.main      (reads PORT/HOST from the environment; no shell needed)
 """
 
 from __future__ import annotations
@@ -9,7 +9,8 @@ from __future__ import annotations
 import mimetypes
 import os
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
+from typing import Any
 
 import httpx
 from fastapi import FastAPI, Request
@@ -111,11 +112,36 @@ def create_app(settings: Settings | None = None, *, llm: StructuredLLM | None = 
     return app
 
 
-def run() -> None:  # pragma: no cover - manual entry point
+def server_options(environ: Mapping[str, str] | None = None) -> dict[str, Any]:
+    """uvicorn settings read from the environment.
+
+    PORT is read here rather than on a command line, so no start command depends on shell expansion:
+    Railway runs custom start commands without a shell, where a literal "$PORT" reaches uvicorn and the
+    container crash-loops. When PORT is set (a hosting platform) the server binds all interfaces.
+    """
+    env = os.environ if environ is None else environ
+    raw_port = (env.get("PORT") or "").strip()
+    try:
+        port = int(raw_port) if raw_port else 8000
+    except ValueError as exc:
+        raise SystemExit(f"PORT must be an integer port number, got {raw_port!r}.") from exc
+    if not 0 < port < 65536:
+        raise SystemExit(f"PORT must be between 1 and 65535, got {port}.")
+    return {
+        "host": env.get("HOST") or ("0.0.0.0" if raw_port else "127.0.0.1"),  # noqa: S104 - container binding
+        "port": port,
+        "factory": True,
+        "workers": 1,  # sessions live in process memory
+        "proxy_headers": True,
+        "forwarded_allow_ips": env.get("FORWARDED_ALLOW_IPS", "*"),
+        "timeout_keep_alive": 75,
+    }
+
+
+def run() -> None:  # pragma: no cover - process entry point
     import uvicorn
 
-    uvicorn.run("app.main:create_app", factory=True, host=os.environ.get("HOST", "127.0.0.1"),
-                port=int(os.environ.get("PORT", "8000")), workers=1, proxy_headers=True)
+    uvicorn.run("app.main:create_app", **server_options())
 
 
 if __name__ == "__main__":  # pragma: no cover

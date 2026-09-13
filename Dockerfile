@@ -26,5 +26,6 @@ USER appuser
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import urllib.request,os; urllib.request.urlopen(f'http://127.0.0.1:{os.environ[\"PORT\"]}/health')"
 
-# One worker: sessions are held in process memory (see README, Deployment).
-CMD ["sh", "-c", "uvicorn app.main:create_app --factory --host 0.0.0.0 --port ${PORT} --workers 1 --proxy-headers --forwarded-allow-ips='*'"]
+# The app reads PORT itself (one worker; sessions are held in process memory), so the command
+# works in exec form on any platform - including Railway, which runs start commands without a shell.
+CMD ["python", "-m", "app.main"]
