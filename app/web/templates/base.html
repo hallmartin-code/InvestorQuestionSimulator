@@ -1,0 +1,67 @@
+{% from "_ui.html" import brand %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0B1526">
+  <title>{% block title %}Interview Simulator{% endblock %} · TEN Capital Network</title>
+  <link rel="icon" href="{{ url_for('static', path='favicon.ico') }}" sizes="48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', path='favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', path='favicon-16x16.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', path='apple-touch-icon.png') }}">
+  <link rel="manifest" href="{{ url_for('static', path='site.webmanifest') }}">
+  <link rel="preload" href="{{ url_for('static', path='fonts/sora-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ url_for('static', path='fonts/inter-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  <script src="{{ url_for('static', path='app.js') }}" defer></script>
+</head>
+<body>
+<div class="stage {% block stage_class %}{% endblock %}">
+  <header class="masthead">
+    {{ brand() }}
+    {% if session and (session.authenticated or stage != 'upload') %}
+    <form method="post" action="/reset" class="inline" data-confirm="Start over? Your current session will be discarded.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="link-button">Start over</button>
+    </form>
+    {% endif %}
+  </header>
+
+  {% block stepper %}
+  <nav class="stepper" aria-label="Progress">
+    <ol>
+    {% set ns = namespace(reached=true) %}
+    {% for key, label in steps %}
+      <li class="step {% if key == stage %}current{% elif ns.reached %}done{% endif %}"{% if key == stage %} aria-current="step"{% endif %}>
+        <span><span class="step-num">{{ '%02d' | format(loop.index) }}</span><span class="step-label">{{ label }}</span></span>
+      </li>
+      {% if key == stage %}{% set ns.reached = false %}{% endif %}
+    {% endfor %}
+    </ol>
+  </nav>
+  {% endblock %}
+
+  <main>
+    {% for notice in notices %}
+      <div class="notice" role="status">{{ notice }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    Powered by TEN Capital Network · v{{ version }}
+    <span>Confidential – for recipients only · session data is deleted after {{ retention_hours | round | int }} hours</span>
+  </footer>
+</div>
+
+<div class="overlay" id="loading-overlay" hidden>
+  <div class="card accent overlay-card" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="overlay-title" id="loading-text">Working…</p>
+    <p class="meta">This can take up to a minute. Keep this tab open.</p>
+  </div>
+</div>
+</body>
+</html>

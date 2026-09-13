@@ -1,0 +1,43 @@
+{# Shared UI macros. Everything is CSP-safe: sizes and fills are SVG attributes, never inline styles. #}
+
+{% macro brand() -%}
+<a class="brand" href="/" aria-label="TEN Capital Network — home">
+  <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true">
+    <path class="mk-amber" d="M50 6 C64 6 74 16 74 16"></path>
+    <path class="mk-teal" d="M76 66 C76 82 63 92 63 92"></path>
+    <path class="mk-coral" d="M24 66 C24 82 37 92 37 92" transform="rotate(180 50 79)"></path>
+    <circle class="mk-amber-fill" cx="50" cy="20" r="11"></circle>
+    <circle class="mk-teal-fill" cx="78" cy="68" r="11"></circle>
+    <circle class="mk-coral-fill" cx="22" cy="68" r="11"></circle>
+  </svg>
+  <span class="brand-word">Ten Capital<span>Network</span></span>
+</a>
+{%- endmacro %}
+
+{% macro bar(pct, tone) -%}
+<svg class="bar tone-{{ tone }}" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+  {%- if tone == 'brand' %}<defs><linearGradient id="brand-grad" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#EE5A4E"></stop><stop offset=".45" stop-color="#F0776C"></stop><stop offset="1" stop-color="#F3A22A"></stop></linearGradient></defs>{% endif -%}
+  <rect class="bar-track" width="100" height="8"></rect>
+  {%- if pct is not none %}<rect class="bar-fill{% if tone == 'brand' %} tone-brand{% endif %}" width="{{ [[pct, 0] | max, 100] | min }}" height="8"></rect>{% endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro ring(value, maximum, tone, suffix, size='') -%}
+<div class="ring {{ size }} tone-{{ tone }}">
+  <svg viewBox="0 0 120 120" aria-hidden="true">
+    <circle class="ring-track" cx="60" cy="60" r="52" pathLength="100"></circle>
+    {%- if value is not none %}
+    <circle class="ring-fill" cx="60" cy="60" r="52" pathLength="100" transform="rotate(-90 60 60)"
+            stroke-dasharray="{{ ([[value / maximum * 100, 0] | max, 100] | min) | round(1) }} 100"></circle>
+    {%- endif %}
+  </svg>
+  <div class="ring-label"><span class="ring-value">{{ value if value is not none else '—' }}</span><span class="ring-suffix">{{ suffix }}</span></div>
+</div>
+{%- endmacro %}
+
+{% macro progress(state) -%}
+<div class="progress" role="progressbar" aria-label="Interview progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ state.progress_pct }}">
+  {{ bar(state.progress_pct, 'brand') }}
+  <span class="meta">{{ state.answered }} answered · ~{{ state.max_questions }} questions</span>
+</div>
+{%- endmacro %}

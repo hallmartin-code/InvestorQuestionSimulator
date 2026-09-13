@@ -1,0 +1,277 @@
+{
+  "template_name": "TEN Capital Fundraising Interview Readiness Report",
+  "template_version": "1.0",
+  "description": "Canonical structure of the one-page report generated at the end of every fundraising interview session. Section order, headings, field labels, source bindings, formats, item and length limits, empty-value text, the fundraising snapshot rows, the category-score rows and the footer are read from this file at runtime by app/reports/pdf_generator.py and app/reports/report_data.py. REPORT_TEMPLATE.md and readiness_report_template.pdf are generated from it. Edit this file, then run: python -m app.reports.template",
+
+  "document": {
+    "title": "FUNDRAISING INTERVIEW READINESS REPORT",
+    "footer_title": "Fundraising Interview Readiness Report",
+    "filename_pattern": "Fundraising_Interview_Readiness_{company_slug}.pdf",
+    "page_size": "US Letter (8.5 × 11 in)",
+    "orientation": "portrait",
+    "max_pages": 1,
+    "margins_in": {"left": 0.5, "right": 0.5, "top": 0.45, "bottom": 0.62},
+    "font": "Open Sans (regular, semibold, bold, italic) from app/assets/fonts; Helvetica fallback",
+    "type_scale_pt": {"title": 17, "section_header": 9.5, "body": 8.5, "score": 30, "footer": 7},
+    "palette": {
+      "navy": "#1F3864", "blue": "#2E75B6", "ink": "#222222", "grey": "#555555", "light_grey": "#8A8A8A",
+      "rule": "#D9D9D9", "panel": "#F4F6F9", "track": "#EEF1F5", "green": "#2E7D32", "amber": "#B26A00", "red": "#8C1D18"
+    },
+    "date_format": "Month D, YYYY",
+    "money_format": "Currency symbol with K/M/B suffix, up to two decimals, trailing zeros removed",
+    "percent_format": "Up to one decimal place followed by %",
+    "missing_value_marker": "Not provided",
+    "not_assessed_marker": "n/a",
+    "no_score_marker": "—",
+    "confidentiality_notice": "Confidential – for recipients only"
+  },
+
+  "fit_ladder": [
+    {"body_pt": 8.5, "max_list_items": 5, "text_scale": 1.0},
+    {"body_pt": 8.0, "max_list_items": 4, "text_scale": 0.85},
+    {"body_pt": 7.5, "max_list_items": 3, "text_scale": 0.7},
+    {"body_pt": 7.0, "max_list_items": 3, "text_scale": 0.5}
+  ],
+
+  "layout_sketch": [
+    "+------------------------------------------------------------------------------+",
+    "| FUNDRAISING INTERVIEW READINESS REPORT                       [Month D, YYYY] |",
+    "|                                                              [Interview mode]|",
+    "| Company: [Company Name] · Sector: [Sector] · Stage: [Stage] · Raise: [Raise]  |",
+    "+==============================================================================+",
+    "| [XX] / 100            | INVESTOR ASSESSMENT                                  |",
+    "| [READINESS LEVEL]     | [2-4 sentence assessment]                            |",
+    "| [interview facts]     | Highest-risk topic: [Topic]                          |",
+    "+-----------------------+------------------------------------------------------+",
+    "| CATEGORY SCORES                        | FUNDRAISING SNAPSHOT                |",
+    "| [11 horizontal bars, 0-100, 60/80 guides] | [8 label / value rows]           |",
+    "+----------------------------------------+-------------------------------------+",
+    "| STRONGEST AREAS (3)                    | INVESTOR CONCERNS (3-5)             |",
+    "| WEAKEST AREAS (3)                      |                                     |",
+    "+----------------------------------------+-------------------------------------+",
+    "| QUESTIONS TO PRACTICE (3)              | RECOMMENDED NEXT STEPS (3)          |",
+    "+------------------------------------------------------------------------------+",
+    "|                    Confidential – for recipients only                        |",
+    "| [Document Title]  [PAGE#]  Compiled on [DATE] by TEN Capital Network  [Logo] |",
+    "+------------------------------------------------------------------------------+"
+  ],
+
+  "score_colors": [
+    {"min": 80, "max": 100, "label": "Strong", "color": "#2E7D32"},
+    {"min": 70, "max": 79, "label": "Promising", "color": "#2E75B6"},
+    {"min": 60, "max": 69, "label": "Needs preparation", "color": "#B26A00"},
+    {"min": 0, "max": 59, "label": "Not ready", "color": "#8C1D18"}
+  ],
+
+  "readiness_levels": [
+    {"min": 90, "max": 100, "label": "INVESTOR READY"},
+    {"min": 80, "max": 89, "label": "STRONG — MINOR PREPARATION NEEDED"},
+    {"min": 70, "max": 79, "label": "PROMISING — SEVERAL WEAK AREAS"},
+    {"min": 60, "max": 69, "label": "SIGNIFICANT PREPARATION NEEDED"},
+    {"min": 0, "max": 59, "label": "NOT YET READY FOR INVESTOR OUTREACH"}
+  ],
+
+  "data_status_vocabulary": [
+    {"value": "VERIFIED_FROM_DECK", "meaning": "Stated in the deck; the slide and a verbatim quote are recorded."},
+    {"value": "USER_PROVIDED", "meaning": "Entered or corrected by the founder; takes precedence over the deck."},
+    {"value": "CALCULATED", "meaning": "Derived by a deterministic formula from other fields; shown with a (calculated) suffix."},
+    {"value": "INFERRED", "meaning": "Interpretation, allowed only for categorical fields; shown with an (inferred) suffix."},
+    {"value": "MISSING", "meaning": "Not available; shown as the missing-value marker."}
+  ],
+
+  "claim_type_vocabulary": [
+    {"value": "FACT", "meaning": "A deck statement carrying a third-party citation."},
+    {"value": "FOUNDER_CLAIM", "meaning": "Asserted by the deck or the founder without independent support."},
+    {"value": "ASSUMPTION", "meaning": "A projection, target, plan or use of funds."},
+    {"value": "CALCULATION", "meaning": "Arithmetic on stated figures."},
+    {"value": "INFERENCE", "meaning": "An interpretation, never presented as fact."},
+    {"value": "MISSING", "meaning": "Information that is not available."}
+  ],
+
+  "analysis_rules": [
+    "Every value comes from the session: the deck-derived company profile, founder inputs, interview responses and deterministic calculations. No outside data is added.",
+    "Scores, percentages, coverage, classifications and snapshot values are calculated in Python; the model never calculates report values.",
+    "Missing information is printed as the missing-value marker and is never estimated.",
+    "Calculated and inferred snapshot values carry a (calculated) or (inferred) suffix; founder claims are never presented as verified facts.",
+    "Narrative text (assessment, concerns, next steps, practice questions) may be model-written, but every figure must trace to the deck, founder inputs or answers; any other figure is replaced with a bracketed placeholder.",
+    "Categories not covered by the interview are shown as not assessed and excluded from the overall score; the score is marked provisional when coverage is below 60% of the weighting or fewer than five answers were given.",
+    "The report must fit one page: the layout is rebuilt down the fit ladder until it does."
+  ],
+
+  "sections": [
+    {
+      "id": "header",
+      "order": 1,
+      "heading": null,
+      "component": "header",
+      "placement": {"row": 1, "column": "full", "width_fraction": 1.0},
+      "description": "Report title with run date and interview mode on the right; one metadata line; navy rule beneath.",
+      "fields": [
+        {"key": "report_title", "type": "fixed", "value": "FUNDRAISING INTERVIEW READINESS REPORT", "format": "Bold navy, type_scale_pt.title", "rule": "Always this title."},
+        {"key": "report_date", "type": "date", "source": "run date (UTC)", "format": "Month D, YYYY", "placeholder": "[Month D, YYYY]"},
+        {"key": "mode_note", "type": "enum", "source": "session.mode", "values": ["AI-assisted interview", "Heuristic scoring (AI processing off)"], "placeholder": "[Interview mode]"},
+        {"key": "company", "label": "Company", "type": "text", "source": "profile.company_name", "max_chars": 60, "placeholder": "[Company Name]", "empty_text": "Company name not provided", "required": true},
+        {"key": "sector", "label": "Sector", "type": "text", "source": "profile.sector", "max_chars": 40, "placeholder": "[Sector]", "empty_text": "Not provided"},
+        {"key": "stage", "label": "Stage", "type": "text", "source": "profile.stage", "max_chars": 30, "placeholder": "[Stage]", "empty_text": "Not provided"},
+        {"key": "raise", "label": "Raise", "type": "money", "source": "profile.raise_amount", "max_chars": 30, "placeholder": "[Raise Amount]", "empty_text": "Not provided"}
+      ]
+    },
+    {
+      "id": "overall_readiness",
+      "order": 2,
+      "heading": null,
+      "component": "score_panel",
+      "placement": {"row": 2, "column": "left", "width_fraction": 0.278},
+      "description": "Shaded panel with the overall score, its readiness classification (coloured by score band) and interview facts.",
+      "fields": [
+        {"key": "overall_score", "label": "Overall readiness score", "type": "integer", "source": "readiness.overall_score", "format": "0-100 followed by ' / 100'", "placeholder": "[XX]", "empty_text": "—", "required": true, "rule": "Weighted mean of assessed category scores, rounded to an integer."},
+        {"key": "readiness_level", "label": "Readiness classification", "type": "enum", "source": "readiness.level", "values": ["INVESTOR READY", "STRONG — MINOR PREPARATION NEEDED", "PROMISING — SEVERAL WEAK AREAS", "SIGNIFICANT PREPARATION NEEDED", "NOT YET READY FOR INVESTOR OUTREACH"], "placeholder": "[READINESS CLASSIFICATION]", "empty_text": "NOT ASSESSED", "required": true},
+        {"key": "interview_facts", "type": "pattern", "source": "readiness.questions_answered, readiness.coverage_pct, readiness.average_answer_score", "format": "{answers} answers · {coverage}% of weight assessed · avg {average}/20 per answer", "placeholder": "[N] answers · [NN]% of weight assessed · avg [NN.N]/20 per answer"},
+        {"key": "provisional_note", "type": "conditional_text", "source": "readiness.provisional", "value": "Provisional: interview coverage was limited.", "rule": "Shown when coverage < 60% or fewer than five answers."},
+        {"key": "ended_early_note", "type": "conditional_text", "source": "interview.ended_early", "value": "Interview ended before all planned questions.", "rule": "Shown when the founder finished before the interview completed."}
+      ]
+    },
+    {
+      "id": "investor_assessment",
+      "order": 3,
+      "heading": "Investor assessment",
+      "component": "paragraph",
+      "placement": {"row": 2, "column": "right", "width_fraction": 0.722},
+      "description": "Concise investor-oriented summary of the interview, followed by the highest-risk topic.",
+      "fields": [
+        {"key": "investor_assessment", "type": "narrative", "source": "assessment.investor_assessment", "format": "2-4 sentences", "max_chars": 650, "placeholder": "[Two to four sentences: overall readiness, strongest and weakest areas, and the most significant open finding.]", "required": true},
+        {"key": "highest_risk_topic", "label": "Highest-risk topic", "type": "text", "source": "readiness.highest_risk_topic", "placeholder": "[Topic]", "rule": "Interview topic with the highest risk index (100 − topic score + weighted open findings). Omitted when none."}
+      ]
+    },
+    {
+      "id": "category_scores",
+      "order": 4,
+      "heading": "Category scores",
+      "component": "bar_chart",
+      "placement": {"row": 3, "column": "left", "width_fraction": 0.54},
+      "description": "One horizontal bar per readiness category on a 0-100 track with guides at 60 and 80, the score to the right, and the not-assessed marker for categories the interview did not cover.",
+      "item_placeholder": "[NN]",
+      "empty_text": "n/a",
+      "rule": "Category score = mean response percentage of the answers on that category's topics.",
+      "category_rows": [
+        {"key": "market_understanding", "label": "Market Understanding", "weight": 10, "topics": ["market"]},
+        {"key": "problem_customer", "label": "Problem & Customer", "weight": 10, "topics": ["problem", "customer"]},
+        {"key": "product_differentiation", "label": "Product & Differentiation", "weight": 10, "topics": ["product_solution", "defensibility"]},
+        {"key": "traction", "label": "Traction", "weight": 15, "topics": ["traction"]},
+        {"key": "business_model_economics", "label": "Business Model & Economics", "weight": 15, "topics": ["business_model", "unit_economics"]},
+        {"key": "go_to_market", "label": "Go-to-Market", "weight": 10, "topics": ["go_to_market"]},
+        {"key": "competitive_position", "label": "Competitive Position", "weight": 5, "topics": ["competition"]},
+        {"key": "team", "label": "Team", "weight": 10, "topics": ["team"]},
+        {"key": "financial_command", "label": "Financial Command", "weight": 5, "topics": ["financial_performance", "financial_projections"]},
+        {"key": "fundraising_strategy", "label": "Fundraising Strategy", "weight": 5, "topics": ["fundraising", "valuation", "use_of_funds", "milestones", "exit_potential"]},
+        {"key": "risk_awareness", "label": "Risk Awareness", "weight": 5, "topics": ["risks"]}
+      ]
+    },
+    {
+      "id": "fundraising_snapshot",
+      "order": 5,
+      "heading": "Fundraising snapshot",
+      "component": "key_value_table",
+      "placement": {"row": 3, "column": "right", "width_fraction": 0.46},
+      "description": "Label / value rows with hairline separators. Values carry a (calculated) or (inferred) suffix when not stated.",
+      "item_max_chars": 80,
+      "empty_text": "Not provided",
+      "snapshot_rows": [
+        {"key": "raise_amount", "label": "Raise amount", "source": "profile.raise_amount", "format": "money", "placeholder": "[Raise Amount]"},
+        {"key": "amount_committed", "label": "Amount committed", "source": "profile.amount_committed", "format": "money", "placeholder": "[Amount Committed]"},
+        {"key": "valuation", "label": "Valuation / cap", "source": "profile.valuation", "format": "money", "placeholder": "[Valuation or Cap]"},
+        {"key": "revenue", "label": "Revenue", "source": "profile.arr | profile.revenue", "format": "money", "placeholder": "[Revenue or ARR]", "alternate_labels": {"profile.arr": "ARR"}, "rule": "ARR when stated, otherwise annual revenue; the label follows the field used."},
+        {"key": "growth", "label": "Growth", "source": "profile.revenue_growth", "format": "percent", "placeholder": "[Growth Rate]"},
+        {"key": "runway", "label": "Runway", "source": "profile.runway_months", "format": "months", "placeholder": "[NN] months"},
+        {"key": "use_of_funds", "label": "Use of funds", "source": "profile.use_of_funds", "format": "list joined with '; '", "placeholder": "[Use of Funds Allocation]"},
+        {"key": "next_milestone", "label": "Next milestone", "source": "profile.milestones[0]", "format": "text", "placeholder": "[Next Major Milestone]"}
+      ]
+    },
+    {
+      "id": "strongest_areas",
+      "order": 6,
+      "heading": "Strongest areas",
+      "component": "bullet_list",
+      "placement": {"row": 4, "column": "left", "width_fraction": 0.5, "stack": 1},
+      "description": "Highest-scoring assessed categories with a supporting note from the best answer in each.",
+      "source": "assessment.strongest_areas",
+      "max_items": 3,
+      "item_pattern": "{category} — {score}/100: {note}",
+      "item_placeholder": "[Category] — [NN]/100: [Supporting note from the interview]",
+      "item_max_chars": 160,
+      "empty_text": "Not enough answers to rank."
+    },
+    {
+      "id": "weakest_areas",
+      "order": 7,
+      "heading": "Weakest areas",
+      "component": "bullet_list",
+      "placement": {"row": 4, "column": "left", "width_fraction": 0.5, "stack": 2},
+      "description": "Lowest-scoring assessed categories (never repeating a strongest area) with the main weakness from the weakest answer in each.",
+      "source": "assessment.weakest_areas",
+      "max_items": 3,
+      "item_pattern": "{category} — {score}/100: {note}",
+      "item_placeholder": "[Category] — [NN]/100: [Main weakness from the interview]",
+      "item_max_chars": 160,
+      "empty_text": "Not enough answers to rank."
+    },
+    {
+      "id": "investor_concerns",
+      "order": 8,
+      "heading": "Investor concerns",
+      "component": "bullet_list",
+      "placement": {"row": 4, "column": "right", "width_fraction": 0.5},
+      "description": "Most serious open findings from the deck analysis and weaknesses from low-scoring answers, most serious first.",
+      "source": "assessment.investor_concerns",
+      "min_items": 3,
+      "max_items": 5,
+      "item_pattern": "{concern}",
+      "item_placeholder": "[Specific investor concern, most serious first]",
+      "item_max_chars": 210,
+      "empty_text": "No major concerns recorded."
+    },
+    {
+      "id": "questions_to_practice",
+      "order": 9,
+      "heading": "Questions to practice",
+      "component": "numbered_list",
+      "placement": {"row": 5, "column": "left", "width_fraction": 0.5},
+      "description": "Practice questions from the top practice-plan priorities: the actual interview question when the founder scored under 60% on it, otherwise a standard question for the category.",
+      "source": "assessment.questions_to_practice",
+      "max_items": 3,
+      "item_pattern": "{question}",
+      "item_placeholder": "[Practice question targeting a weak category]",
+      "item_max_chars": 230,
+      "empty_text": "No practice questions."
+    },
+    {
+      "id": "recommended_next_steps",
+      "order": 10,
+      "heading": "Recommended next steps",
+      "component": "numbered_list",
+      "placement": {"row": 5, "column": "right", "width_fraction": 0.5},
+      "description": "Concrete actions to take before investor meetings, taken from the top practice-plan priorities.",
+      "source": "assessment.next_steps",
+      "max_items": 3,
+      "item_pattern": "{step}",
+      "item_placeholder": "[Concrete action to complete before investor meetings]",
+      "item_max_chars": 230,
+      "empty_text": "No next steps recorded."
+    },
+    {
+      "id": "footer",
+      "order": 11,
+      "heading": null,
+      "component": "footer",
+      "placement": {"row": 6, "column": "full", "width_fraction": 1.0},
+      "description": "Hairline rule, centred confidentiality notice, then the TEN Capital footer line in Open Sans 7 pt.",
+      "fields": [
+        {"key": "confidentiality_notice", "type": "fixed", "value": "Confidential – for recipients only", "format": "Centred, light grey"},
+        {"key": "document_title", "type": "fixed", "value": "Fundraising Interview Readiness Report", "format": "TEN footer, first element"},
+        {"key": "page_number", "type": "page_number", "source": "page", "placeholder": "[PAGE#]"},
+        {"key": "compiled_line", "type": "pattern", "source": "run date", "format": "Compiled on {date} by TEN Capital Network", "placeholder": "Compiled on [DATE] by TEN Capital Network"},
+        {"key": "logo", "type": "image", "value": "app/assets/TEN_Capital_logo_footer.png", "format": "0.67 × 0.25 in, after the compiled line"}
+      ]
+    }
+  ]
+}

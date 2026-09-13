@@ -1,0 +1,25 @@
+# Files never uploaded by `railway up`. Without this the local .env - live API key included -
+# would be sent to the builder. Secrets reach the container as Railway service variables only.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# VCS and editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Tests, caches and local environments
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+output/
+uploads/

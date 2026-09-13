@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block stepper %}{% endblock %}
+{% block content %}
+<section class="card accent">
+  <div class="eyebrow">Secure access</div>
+  <h1>Sign in to the <span class="to">Interview Simulator</span></h1>
+  <p class="lede">Enter the access token provided by TEN Capital Network.</p>
+  {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="/login" data-loading="Signing in…">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="access_token">Access token</label>
+    <input type="password" id="access_token" name="access_token" autocomplete="current-password" required autofocus>
+    <button type="submit" class="cta">Continue</button>
+  </form>
+</section>
+{% endblock %}

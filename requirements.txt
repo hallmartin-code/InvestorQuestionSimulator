@@ -1,0 +1,25 @@
+# Runtime dependencies (pinned to the versions the test suite was run against).
+# Python 3.12+ (developed on 3.14, deployed on 3.12 - see .python-version).
+
+# Web
+fastapi==0.140.0
+uvicorn[standard]==0.51.0
+jinja2==3.1.6
+python-multipart==0.0.32
+
+# Configuration and models
+pydantic==2.13.4
+pydantic-settings==2.15.0
+python-dotenv==1.2.2
+
+# Deck ingestion
+pymupdf==1.28.2
+python-pptx==1.0.2
+
+# Reporting
+reportlab==5.0.0
+pillow==12.3.0
+
+# External services
+anthropic==0.116.0
+httpx==0.28.1

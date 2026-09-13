@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_ui.html" import progress %}
+{% block title %}Interview{% endblock %}
+{% block stage_class %}medium{% endblock %}
+{% block content %}
+{{ progress(state) }}
+
+{% if state.answered == 0 %}
+<p class="intro-strip"><span><strong>Your investor meeting starts now.</strong> One question at a time; questions get
+  harder as the meeting goes on, and weak answers draw follow-ups. You'll get a score and coaching after every answer.</span></p>
+{% endif %}
+
+{% if question %}
+  {% include "_question.html" %}
+{% else %}
+  <section class="card accent">
+    <div class="eyebrow">Interview complete</div>
+    <h2>All planned topics have been covered.</h2>
+    <p class="muted">See your readiness score, practice plan and one-page report.</p>
+  </section>
+{% endif %}
+
+{% include "_finish.html" %}
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "_ui.html" import progress, ring, bar %}
+{% block title %}Coaching{% endblock %}
+{% block stage_class %}medium{% endblock %}
+{% block content %}
+{{ progress(state) }}
+
+<section class="card feedback">
+  <div class="feedback-head">
+    <div>
+      <div class="eyebrow">{{ response.category.label }} · {{ response.difficulty.label }}{% if response.is_follow_up %} · Follow-up{% endif %}</div>
+      <h2 class="previous-question">{{ response.question }}</h2>
+      <details class="your-answer">
+        <summary>Your answer</summary>
+        <p class="answer-text">{{ response.founder_answer }}</p>
+      </details>
+    </div>
+    {{ ring(response.scores.total, 20, response.scores.percentage | score_class, '/20') }}
+  </div>
+
+  <h3>Score</h3>
+  <div class="dimensions">
+    {% for name, value in [('Clarity', response.scores.clarity), ('Evidence', response.scores.evidence), ('Credibility', response.scores.credibility), ('Completeness', response.scores.completeness)] %}
+    <div class="dimension">
+      <span>{{ name }}</span>
+      {{ bar(value * 20, value | dimension_class) }}
+      <strong>{{ value }}/5</strong>
+    </div>
+    {% endfor %}
+  </div>
+  {% if response.scoring_source == 'heuristic' %}<p class="meta">Scored heuristically (AI scoring off or unavailable).</p>{% endif %}
+
+  <h3>Investor assessment</h3>
+  <p>{{ response.investor_assessment }}</p>
+
+  <div class="grid two">
+    <div>
+      <h3>What worked</h3>
+      {% if response.strengths %}<ul class="list-good">{% for item in response.strengths %}<li>{{ item }}</li>{% endfor %}</ul>
+      {% else %}<p class="muted">Nothing stood out yet.</p>{% endif %}
+    </div>
+    <div>
+      <h3>What needs improvement</h3>
+      {% if response.weaknesses %}<ul class="list-bad">{% for item in response.weaknesses %}<li>{{ item }}</li>{% endfor %}</ul>
+      {% else %}<p class="muted">No major gaps.</p>{% endif %}
+    </div>
+  </div>
+
+  <h3>Better answer structure</h3>
+  <p>{{ response.recommended_answer_structure }}</p>
+
+  <h3>Model answer</h3>
+  <blockquote class="model-answer">{{ response.model_answer | placeholders }}</blockquote>
+  <p class="meta">Highlighted <span class="placeholder">[placeholders]</span> mark figures to replace with your real data.
+    The model answer never invents your numbers{% if response.placeholders_inserted %}; {{ response.placeholders_inserted }} figure(s) not found in your deck or answers were replaced{% endif %}.</p>
+</section>
+
+{% if step_reason %}<p class="meta next-reason">{{ step_reason }}</p>{% endif %}
+
+{% if question %}
+  {% include "_question.html" %}
+{% else %}
+  <section class="card accent">
+    <div class="eyebrow">Interview complete</div>
+    <h2>You've covered the planned topics.</h2>
+    <p class="muted">See your readiness score, practice plan and one-page report.</p>
+  </section>
+{% endif %}
+
+{% include "_finish.html" %}
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Review company profile{% endblock %}
+{% block stage_class %}wide{% endblock %}
+{% block content %}
+<section class="card accent">
+  <div class="eyebrow">Company profile</div>
+  <h1>Review what we <span class="to">extracted</span></h1>
+  <p class="lede">The interview is built from this profile. Correct anything wrong or out of date and fill in what's
+    missing; edited values are recorded as founder-provided.</p>
+  <div class="stat-row">
+    <div class="stat"><span class="stat-value">{{ known }}<small> / {{ total }}</small></span><span class="stat-label">fields found</span></div>
+    {% if deck %}<div class="stat"><span class="stat-value">{{ deck.page_count }}</span><span class="stat-label">{{ deck.unit | lower }}s read · {{ deck.filename }}</span></div>{% endif %}
+    <div class="stat"><span class="stat-value">{% if session.mode == 'ai' %}Claude{% else %}Rules{% endif %}</span>
+      <span class="stat-label">{% if session.mode == 'ai' %}AI-assisted extraction{% else %}Rule-based extraction (AI processing off){% endif %}</span></div>
+  </div>
+</section>
+
+<form method="post" action="/review" data-loading="Analyzing gaps and preparing your interview…">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  {% for key, label, specs in sections %}
+  {% set ns = namespace(found=0) %}
+  {% for spec in specs %}{% if profile.get(spec.name) %}{% set ns.found = ns.found + 1 %}{% endif %}{% endfor %}
+  <details class="card fold-card" {% if loop.index <= 3 or key in ['traction', 'fundraising'] %}open{% endif %}>
+    <summary><h2>{{ label }}</h2><span class="fold-hint">{{ ns.found }} / {{ specs | length }} found</span></summary>
+    <div class="fold-body table-scroll">
+    <table class="profile-table">
+      <thead><tr><th>Field</th><th>Value</th><th>Source</th><th>Evidence</th></tr></thead>
+      <tbody>
+      {% for spec in specs %}
+        {% set fv = profile.get(spec.name) %}
+        {% set alternates = profile.alternates.get(spec.name, []) %}
+        <tr class="{% if not fv %}missing{% endif %}">
+          <td><label for="f-{{ spec.name }}">{{ spec.label }}</label></td>
+          <td>
+            {% if spec.calculated %}
+              <span class="readonly">{{ fv.display if fv else '—' }}</span>
+            {% elif spec.kind == 'text' and (fv.display | length if fv else 0) > 80 or spec.kind == 'list' %}
+              <textarea id="f-{{ spec.name }}" name="field__{{ spec.name }}" rows="2" maxlength="1200">{{ fv.display if fv else '' }}</textarea>
+            {% else %}
+              <input id="f-{{ spec.name }}" name="field__{{ spec.name }}" value="{{ fv.display if fv else '' }}" maxlength="600" placeholder="Not in deck">
+            {% endif %}
+            {% if alternates %}<div class="flag">Also stated as: {% for a in alternates %}{{ a.display }} ({{ a.location }}){% if not loop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+            {% if fv and fv.note %}<div class="muted small">{{ fv.note }}</div>{% endif %}
+          </td>
+          <td>
+            {% if fv %}
+              <span class="badge status-{{ fv.status.value | lower }}">{{ fv.status.value | status_label }}</span>
+              <div class="meta">{{ fv.location }}{% if fv.status.value != 'USER_PROVIDED' %} · {{ (fv.confidence * 100) | round | int }}%{% endif %}</div>
+            {% else %}
+              <span class="badge status-missing">Missing</span>
+            {% endif %}
+          </td>
+          <td class="evidence">{{ fv.evidence if fv and fv.evidence else '' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </details>
+  {% endfor %}
+
+  <div class="action-bar">
+    <span class="meta">Edited values are saved as founder input</span>
+    <button type="submit" class="cta inline">Confirm and start the interview</button>
+  </div>
+</form>
+{% endblock %}

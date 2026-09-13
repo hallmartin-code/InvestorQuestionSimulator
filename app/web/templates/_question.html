@@ -1,0 +1,21 @@
+{# Active question card with the answer form. Expects: question, state, csrf_token, max_answer_chars #}
+<section class="card accent question-card" aria-labelledby="current-question">
+  <div class="question-meta">
+    <span class="chip teal">{{ question.category.label }}</span>
+    <span class="chip">{{ question.difficulty.label }}</span>
+    {% if question.is_follow_up %}<span class="chip amber">Follow-up</span>{% endif %}
+    <span class="meta push">Question {{ state.answered + 1 }} of about {{ state.max_questions }}</span>
+  </div>
+  <h2 id="current-question" class="question-text">{{ question.text }}</h2>
+  <form method="post" action="/interview/answer" data-loading="The investor is evaluating your answer…">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="question_id" value="{{ question.question_id }}">
+    <label for="answer" class="sr-only">Your answer</label>
+    <textarea id="answer" name="answer" rows="8" maxlength="{{ max_answer_chars }}" required data-counter="answer-count"
+              placeholder="Answer as you would in the meeting: lead with the direct answer, then the evidence."></textarea>
+    <div class="form-row">
+      <span class="meta" id="answer-count" aria-live="polite">0 words</span>
+      <button type="submit" class="cta inline">Submit answer</button>
+    </div>
+  </form>
+</section>

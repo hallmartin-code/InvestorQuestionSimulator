@@ -1,0 +1,10 @@
+{# Finish control. Expects: state, csrf_token #}
+{% if state.answered > 0 %}
+<form method="post" action="/interview/finish" class="finish" data-loading="Calculating your readiness score and building your report…"
+      {% if state.current %}data-confirm="Finish now? Unanswered topics will be marked as not assessed."{% endif %}>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <button type="submit" class="{% if state.current %}btn-ghost{% else %}cta{% endif %}">
+    {% if state.current %}Finish interview early{% else %}See my results{% endif %}
+  </button>
+</form>
+{% endif %}

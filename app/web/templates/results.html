@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% from "_ui.html" import ring, bar %}
+{% block title %}Results{% endblock %}
+{% block stage_class %}wide{% endblock %}
+{% block content %}
+{% set r = readiness %}
+{% set tone = r.overall_score | score_class %}
+<section class="card accent results-hero">
+  {{ ring(r.overall_score, 100, tone, '/100', 'lg') }}
+  <div>
+    <div class="eyebrow">Fundraising interview readiness · {{ profile.company_name }}</div>
+    <h1 class="level tone-{{ tone }}">{{ r.level.value if r.level else 'Not assessed' }}</h1>
+    <p>{{ assessment.investor_assessment }}</p>
+    <p class="meta">{{ r.questions_answered }} answers · {{ r.coverage_pct }}% of readiness weight assessed
+      {% if r.average_answer_score is not none %}· average answer {{ r.average_answer_score }}/20{% endif %}
+      {% if r.provisional %}· provisional score{% endif %}
+      {% if state.ended_early %}· interview ended early{% endif %}</p>
+    <div class="actions">
+      <a class="cta inline" href="/results/report.pdf">Download one-page PDF</a>
+      <a class="btn-ghost" href="/results/session.json">Session data (JSON)</a>
+    </div>
+  </div>
+</section>
+
+<div class="grid two">
+  <section class="card compact">
+    <h2>Category scores</h2>
+    <ul class="scores-list">
+      {% for c in r.category_scores %}
+      <li class="{% if c.score is none %}na{% endif %}">
+        <span>{{ c.label }} <span class="weight">{{ c.weight }}</span></span>
+        {{ bar(c.score, c.score | score_class) }}
+        <span class="num">{{ c.score | round | int if c.score is not none else 'n/a' }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="meta">Weights sum to 100; categories the interview did not cover are excluded and shown as n/a.</p>
+  </section>
+
+  <section class="card compact">
+    <h2>Key findings</h2>
+    <dl class="facts">
+      <dt>Strongest category</dt><dd>{{ r.strongest_category or '—' }}</dd>
+      <dt>Weakest category</dt><dd>{{ r.weakest_category or '—' }}</dd>
+      <dt>Highest-risk topic</dt><dd>{{ r.highest_risk_topic or '—' }}</dd>
+      {% if r.most_credible_argument %}<dt>Most credible argument</dt><dd>{{ r.most_credible_argument.category }} ({{ r.most_credible_argument.score }}/20): “{{ r.most_credible_argument.summary }}”</dd>{% endif %}
+      {% if r.weakest_argument %}<dt>Weakest argument</dt><dd>{{ r.weakest_argument.category }} ({{ r.weakest_argument.score }}/20): “{{ r.weakest_argument.summary }}”</dd>{% endif %}
+    </dl>
+  </section>
+</div>
+
+<div class="grid two">
+  <section class="card compact">
+    <h2>Strongest areas</h2>
+    <ul class="list-good">{% for a in assessment.strongest_areas %}<li><strong>{{ a.label }}</strong> <span class="meta">{{ a.score | round | int }}/100</span>{% if a.note %}<br><span class="muted small">{{ a.note }}</span>{% endif %}</li>{% else %}<li class="muted">Not enough answers to rank.</li>{% endfor %}</ul>
+    <h2>Weakest areas</h2>
+    <ul class="list-bad">{% for a in assessment.weakest_areas %}<li><strong>{{ a.label }}</strong> <span class="meta">{{ a.score | round | int }}/100</span>{% if a.note %}<br><span class="muted small">{{ a.note }}</span>{% endif %}</li>{% else %}<li class="muted">Not enough answers to rank.</li>{% endfor %}</ul>
+  </section>
+  <section class="card compact">
+    <h2>Investor concerns</h2>
+    <ul class="list-bad">{% for c in assessment.investor_concerns %}<li>{{ c }}</li>{% else %}<li class="muted">No major concerns recorded.</li>{% endfor %}</ul>
+    <h2>Recommended next steps</h2>
+    <ol>{% for s in assessment.next_steps %}<li>{{ s }}</li>{% endfor %}</ol>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Practice plan</h2>
+  <div class="practice-grid">
+  {% for p in assessment.practice_plan %}
+    <article class="practice">
+      <h3>{{ loop.index }}. {{ p.category }}</h3>
+      <span class="meta tone-{{ p.score | score_class }}">{{ (p.score | round | int ~ '/100') if p.score is not none else 'not assessed' }}</span>
+      <dl>
+        <dt>Weakness</dt><dd>{{ p.weakness }}</dd>
+        <dt>Why investors care</dt><dd>{{ p.why_investors_care }}</dd>
+        <dt>Missing evidence</dt><dd>{{ p.missing_evidence }}</dd>
+        <dt>Recommended action</dt><dd>{{ p.recommended_action }}</dd>
+        <dt>Practice question</dt><dd class="practice-q">“{{ p.practice_question }}”</dd>
+      </dl>
+    </article>
+  {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>Your answers</h2>
+  {% for resp in state.responses %}
+  <details class="answer-review">
+    <summary><span class="chip">{{ resp.category.label }}</span><span>{{ resp.question }}</span>
+      <strong class="push meta tone-{{ resp.scores.percentage | score_class }}">{{ resp.scores.total }}/20</strong></summary>
+    <p class="answer-text">{{ resp.founder_answer }}</p>
+    <p><strong>Assessment:</strong> {{ resp.investor_assessment }}</p>
+    <p><strong>Model answer:</strong> {{ resp.model_answer | placeholders }}</p>
+  </details>
+  {% endfor %}
+</section>
+
+<p class="meta status-line">
+  {% if analytics %}TEN Capital analytics: {{ analytics.detail }}{% endif %}
+  {% if session.email and session.email.status != 'skipped' %}<br>Results email: {{ 'sent to TEN Capital' if session.email.status == 'sent' else 'not delivered' }}.{% endif %}
+</p>
+{% endblock %}

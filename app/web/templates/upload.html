@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Upload your deck{% endblock %}
+{% block content %}
+{% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+
+<form method="post" action="/upload" enctype="multipart/form-data" class="card accent" data-loading="Reading your deck and building the company profile…">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <div class="eyebrow">Fundraising Interview Simulator</div>
+  <h1>Pitch Deck<span class="arrow">&rarr;</span><span class="to">Investor Interview</span></h1>
+  <p class="lede">Upload your deck and face a demanding venture investor: one tailored question at a time, scored and
+    coached on every answer, ending with a one-page readiness report.</p>
+
+  <label class="dropzone" for="deck" data-dropzone data-max-bytes="{{ max_upload_mb * 1048576 }}" data-accept=".pdf,.pptx,.ppt">
+    <span class="dropzone-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"></path></svg>
+    </span>
+    <span class="dropzone-title" data-dropzone-title>Click to choose a deck, or drop it here</span>
+    <span class="dropzone-sub" data-dropzone-sub><b>.pdf</b> &middot; <b>.pptx</b> &middot; <b>.ppt</b> &nbsp;·&nbsp; up to {{ max_upload_mb }}&nbsp;MB</span>
+    <input class="sr-only" type="file" id="deck" name="deck" accept=".pdf,.pptx,.ppt,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint" required>
+  </label>
+
+  <details class="fold">
+    <summary><span class="fold-title">Company details</span><span class="fold-hint">Optional · overrides the deck</span></summary>
+    <div class="fold-body">
+      <div class="field-grid">
+        <div><label for="company_name">Company name</label><input id="company_name" name="company_name" value="{{ form.company_name or '' }}" maxlength="200"></div>
+        <div><label for="sector">Sector</label><input id="sector" name="sector" value="{{ form.sector or '' }}" maxlength="200" placeholder="e.g. Healthcare SaaS"></div>
+        <div><label for="stage_select">Stage</label>
+          <select id="stage_select" name="stage">
+            {% for option in stage_options %}<option value="{{ option }}" {% if form.stage == option %}selected{% endif %}>{{ option or '—' }}</option>{% endfor %}
+          </select></div>
+        <div><label for="geography">Headquarters</label><input id="geography" name="geography" value="{{ form.geography or '' }}" maxlength="200"></div>
+        <div><label for="raise_amount">Raise amount</label><input id="raise_amount" name="raise_amount" value="{{ form.raise_amount or '' }}" placeholder="$3M" maxlength="50"></div>
+        <div><label for="amount_committed">Amount committed</label><input id="amount_committed" name="amount_committed" value="{{ form.amount_committed or '' }}" placeholder="$750K" maxlength="50"></div>
+        <div><label for="valuation">Valuation / cap</label><input id="valuation" name="valuation" value="{{ form.valuation or '' }}" placeholder="$15M" maxlength="50"></div>
+        <div><label for="instrument">Instrument</label>
+          <select id="instrument" name="instrument">
+            {% for option in instrument_options %}<option value="{{ option }}" {% if form.instrument == option %}selected{% endif %}>{{ option or '—' }}</option>{% endfor %}
+          </select></div>
+        <div><label for="revenue">Annual revenue</label><input id="revenue" name="revenue" value="{{ form.revenue or '' }}" placeholder="$1.2M" maxlength="50"></div>
+        <div><label for="runway_months">Runway (months)</label><input id="runway_months" name="runway_months" value="{{ form.runway_months or '' }}" inputmode="numeric" maxlength="10"></div>
+      </div>
+      <label for="notes">Anything else investors should know</label>
+      <textarea id="notes" name="notes" rows="3" maxlength="8000" placeholder="Recent metrics, updates since the deck was made…">{{ form.notes or '' }}</textarea>
+    </div>
+  </details>
+
+  <details class="fold">
+    <summary><span class="fold-title">Your details</span><span class="fold-hint">Optional</span></summary>
+    <div class="fold-body">
+      <div class="field-grid">
+        <div><label for="user_name">Name</label><input id="user_name" name="user_name" value="{{ form.user_name or '' }}" autocomplete="name" maxlength="100"></div>
+        <div><label for="user_email">Email</label><input id="user_email" name="user_email" type="email" value="{{ form.user_email or '' }}" autocomplete="email" maxlength="254"></div>
+      </div>
+    </div>
+  </details>
+
+  <fieldset class="consent">
+    <legend class="section-label">Privacy &amp; consent</legend>
+    <label class="check">
+      <input type="checkbox" name="ai_processing_consent" {% if form.ai_processing_consent %}checked{% endif %} {% if not ai_available %}disabled{% endif %}>
+      <span><strong>Use Claude to run the interview.</strong> Deck text and your answers are sent to Anthropic's API to extract
+        company data, write tailored questions and score your answers.
+        {% if not ai_available %}<em>AI processing is not configured on this server; the interview will use standard questions and heuristic scoring.</em>
+        {% else %}Without this, nothing leaves this server and the interview uses standard questions and heuristic scoring.{% endif %}</span>
+    </label>
+    <label class="check">
+      <input type="checkbox" name="analytics_consent" {% if form.analytics_consent %}checked{% endif %}>
+      <span><strong>Share anonymized session analytics with TEN Capital</strong> (sector, stage, scores and topics; no names, email, company name or financials).</span>
+    </label>
+    <label class="check">
+      <input type="checkbox" name="data_storage_consent" {% if form.data_storage_consent %}checked{% endif %}>
+      <span><strong>Allow TEN Capital to store company details</strong> with those analytics (company name, location, raise, valuation, runway){% if results_emailed %}, and to receive a copy of your interview answers with the emailed report{% elif results_emailed_with_storage %}, and to receive your readiness report and interview answers by email{% endif %}.</span>
+    </label>
+    <label class="check">
+      <input type="checkbox" name="marketing_consent" {% if form.marketing_consent %}checked{% endif %}>
+      <span><strong>TEN Capital may contact me</strong> about fundraising support using the name and email above.</span>
+    </label>
+    <label class="check required">
+      <input type="checkbox" name="confirm_rights" {% if form.confirm_rights %}checked{% endif %} required>
+      <span><strong>I am authorized to share this deck.</strong></span>
+    </label>
+  </fieldset>
+
+  <button type="submit" class="cta">Start the investor interview</button>
+
+  <div class="disclosure">
+    The uploaded file is processed on the server and deleted as soon as it is read; extracted text is kept only for
+    this session (at most {{ retention_hours | round | int }} hours).{% if results_emailed %} When the interview finishes,
+    your readiness report and score summary are emailed to TEN Capital at <code>{{ email_recipients | join(', ') }}</code>.{% endif %}
+  </div>
+</form>
+{% endblock %}
