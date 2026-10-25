@@ -74,14 +74,7 @@ main { display: block; }
 .masthead { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; padding: 0 4px; }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
 .brand:hover { color: inherit; }
-.brand-mark { width: 34px; height: 34px; flex-shrink: 0; }
-.brand-mark path { fill: none; stroke-width: 11; stroke-linecap: round; }
-.mk-amber { stroke: var(--amber); }
-.mk-teal { stroke: var(--teal); }
-.mk-coral { stroke: var(--coral); }
-.mk-amber-fill { fill: var(--amber); }
-.mk-teal-fill { fill: var(--teal); }
-.mk-coral-fill { fill: var(--coral); }
+.brand-mark { width: 34px; height: 34px; flex-shrink: 0; display: block; }
 .brand-word { font-family: var(--font-display); font-weight: 800; font-size: 15px; letter-spacing: .04em; line-height: 1.15; text-transform: uppercase; }
 .brand-word span { display: block; font-weight: 600; font-size: 10px; letter-spacing: .22em; color: var(--ink-500); margin-top: 2px; }
 .link-button { font: 500 12px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-500);
